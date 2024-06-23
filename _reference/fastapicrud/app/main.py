@@ -26,6 +26,7 @@ def show_users(db:Session=Depends(get_db)):
     usuarios = db.query(models.User).all()
     return usuarios
 
+
 @app.post('/usuarios/',response_model=schemas.User)
 def create_users(entrada:schemas.User,db:Session=Depends(get_db)):
     usuario = models.User(username = entrada.username,nombre=entrada.nombre,rol=entrada.rol,estado=entrada.estado)
