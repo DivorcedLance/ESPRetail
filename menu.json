@@ -1,0 +1,201 @@
+Menu Inicial
+'''
+  (input)Inserte Operador
+  (input)Inserte Clave de Operador
+  (input)Inserte Autorizador
+  (input)Inserte Clave de Autorizador
+  # Menu Principal
+'''
+
+# Menu Caja
+'''
+Anular Item [Autorizador, Clave de Autorizador] (Productos > 0)
+  # (input) Productos [Código de Producto, Cantidad]
+Consulta EAN
+  # (input) Productos [Código de Producto]
+Descuentos
+  # (lista) Descuentos
+Tipo de Cambio
+  # (lista) Tipo de Cambio
+Consulta Tarjeta X
+  # (input) Numero de Tarjeta
+  # Mostrar Saldo ()
+Suspender (Productos > 0)
+  # Imprimir Nro de Orden ()
+Retomar
+  # (input) Nro de Orden
+Anular Transacción
+'''
+
+# Menu Principal
+'''
+Nueva Venta
+  Boleta
+    _>
+  Factura
+    # RUC
+    _>
+  _> Insertar Documento
+  DNI
+    # (input) Nro DOC
+    _>
+  Carnet extranjería
+    # (input) Nro DOC
+    _>
+  Pasaporte
+    # (input) Nro DOC
+    _>
+  _> 
+  # (input) Productos [Código de Producto, Cantidad]
+  # (option) Menu Caja
+    +> (Hasta Que el monto sea <=0)
+    Soles
+      _>
+    Dolares
+      _>
+    Euros
+      _>
+    NC por Cambio
+      _>
+    Vale de Mercaderia
+      _>
+    Tarjeta MC
+      _>
+    Tarjeta de Alimento
+      _>
+    _> Monto
+      # (input) Monto <por defecto mostrar monto restante>
+      +>
+    # Mostrar Vuelto ()
+    # Imprimir Comprobante de Pago ()
+  # (lista) Tipo de Cambio
+Shopper
+  # (input) Nro de Orden
+  # (input) Verificar Productos [Código de Producto, Cantidad]
+  # Imprimir comprobante de Pago ()
+Tarjeta X
+  Consulta
+    # (input) Numero de Tarjeta
+    # Mostrar Saldo ()
+  Debito
+    Recargar
+      # (input) Recargar [Monto, Nro Tarjeta]
+    Retirar
+      # (input) Retirar [Monto, Nro Tarjeta, Contraseña]
+  Crédito
+    Abonar
+      # (input) Abonar [Monto, Nro Tarjeta]
+    Disposición de efectivo
+      # (input) Disposición de efectivo [Monto, Nro Tarjeta, Contraseña]
+    Estado de cuenta
+      # (input) Estado de cuenta [Nro Tarjeta, Contraseña]
+Consulta EAN
+  # (input) Productos [Código de Producto]
+Tipo de Cambio
+  # (lista) Tipo de Cambio
+Menu Supervisor
+  Cerrar Sesión
+  Fondo Fijo
+    # (input) Cantidad [Monto, Autorizador, Clave de Autorizador]
+  Cierre de caja
+    Reporte Previo
+      # (input) Autorizador
+      # (input) Clave de Autorizador
+      # Imprimir Reporte Previo ()
+    Retiro
+      # (input) Cantidad [MontoSoles, MontoDolares, Monto Euros, Autorizador, Clave de Autorizador]
+    Arqueo
+      # (input) Cantidad [MontoSoles, MontoDolares, Monto Euros]
+    Reporte Final
+      # (input) [Autorizador, Clave de Autorizador]
+      # Imprimir Reporte Final ()
+      # Imprimir Reporte Detallado ()
+      # Cerrar Sesión ()
+  Reporte Detallado
+    # (input) Reporte Detallado [Autorizador, Clave de Autorizador]
+    # Imprimir Reporte Detallado ()
+  Apertura Cajón
+    # (input) Apertura Cajón [Autorizador, Clave de Autorizador]
+    # abrirCajon()
+  Devolución
+    # (input) Devolución [insertar Nro de Ticket]
+      Devolución Parcial
+        # Codigos de Producto (while #input [Codigo, Cantidad])
+        _>
+      Devolución Total
+        _>
+      _> Insertar Documento
+      DNI
+        # (input) Nro DOC
+        _>
+      Carnet extranjería
+        # (input) Nro DOC
+        _>
+      Pasaporte
+        # (input) Nro DOC
+        _>
+      _> Medio de Devolución
+        Soles
+          # Constancia de Devolución de efectivo ()
+        NC por Cambio
+          # Constancia NC por Cambio ()
+        Extorno
+          Tarjeta de Credito
+            _>
+          Tarjeta de Debito
+            _>
+          Tarjeta de Alimento
+            _>
+          _> Ingresar Numero de tarjeta
+            # (input) Numero de Tarjeta
+            # Constancia de Extorno ()
+  Crear Descuento
+  Crear Usuario 
+    # (input) Crear Usuario [Usuario, Clave, Autorizador, Clave de Autorizador]
+  Cambiar Clave de Operador
+    # (input) Cambiar Clave de Operador [Usuario, Clave, Nueva Clave, Autorizador, Clave de Autorizador]
+  Cambiar Clave de Autorizador
+    # (input) Cambiar Clave de Autorizador [Usuario, Clave, Autorizador, Clave de Autorizador, Nueva Clave de Autorizador]
+'''
+
+[
+  {
+    "index": "1",
+    "name": "Nueva Venta"
+  },
+  {
+    "index": "2",
+    "name": "Consulta EAN"
+  },
+  {
+    "index": "3",
+    "name": "Descuentos"
+  },
+  {
+    "index": "4",
+    "name": "Tipo de Cambio"
+  },
+  {
+    "index": "5",
+    "name": "Tarjeta X"
+  },
+  {
+    "index": "6",
+    "name": "Menu Supervisor"
+  }
+]
+
+
+String f = "print"
+
+void realizarFuncion(String func) {
+  switch (func) {
+    case "print":
+      print();
+      break;
+    case "erase":
+      erase();
+      break;
+  }
+}
+
