@@ -89,23 +89,15 @@ void display3Options (String* options, int nOptions, int index) {
 }
 
 // Globals
-
 int typeDisplay;
 
 int displayIndex;
 String inputFooter;
 int selectorY;
 int pag;
-
-// Menu
-
-String* options;
-int nOptions;
-int selectedOption;
-int optionSelectorY;
-
-String label;
 String inputText;
+
+// ==============
 
 String* itemsList;
 int nItems;
@@ -119,36 +111,55 @@ bool isVista;
 int productsIndex;
 int productsSelectorY;
 
+// ================ Display 0 ================
+
+// Variables Display 0
+String* options;
+int nOptions;
+int selectedOption;
+int optionSelectorY;
+
+// Estados Display 0
+int currentStateD0;
+int nStatesD0;
+int nextFCodeD0;
+
+// Menu Principal
+String menu_principal_options[] = {"Nueva Venta", "Shopper", "Tarjeta X", "Consulta EAN", "Tipo de Cambio", "Menu Supervisor"};
+// Menu Caja
+String menu_caja_options[] = {"Anular Item", "Consulta EAN", "Descuentos", "Tipo de Cambio", "Consulta Tarjeta X", "Suspender", "Retomar", "Redimir Cupón", "Items Faltantes Shop", "Anular Transacción"};
+
+
+// ================ Display 1 ================
+
+// Variables Display 1
+String label;
+
 // Estados Display 1
-int currentStateD1;
-int finalStateD1;
 String* d1_labels;
+int currentStateD1;
+int nStatesD1;
+int nextFCodeD1;
 
 // Login
 String login_labels[] = {"Inserte Operador", "Inserte Clave Operador", "Inserte Autorizador", "Inserte Clave Autorizador"};
 
-// ================ Handle Displays ================
+// ================ CallBack Implementation ================
 
-void initDisplay1 (String labelText) {
-    typeDisplay = 1;
-    label = labelText;
-    inputText = "_";
-    updateDisplay1();
-}
-
-void updateDisplay1 () {
-    updateLabelText(label);
-    updateInputText(inputText);
-}
-
-void updateLabelText (String newText) {
-    clearRow(1);
-    // TODO: Handle better length > 20 
-    if (newText.length() > 20) {
-        newText = newText.substring(0, 20);
+void callFunctionCode (int code) {
+    switch (code) {
+        case 0:
+            login();
+            break;
+        case 1:
+            menuPrincipal();
+            break;
+        default:
+            break;
     }
-    writeRow(1, newText);
 }
+
+// ================ Handle Displays ================
 
 void updateInputText (String newText) {
     clearRow(3);
@@ -156,7 +167,10 @@ void updateInputText (String newText) {
 }
 
 void writeInInput (char c) {
-  // ! Handle length > 20
+  // TODO: Handle better length > 20
+  if (inputText.length() > 20) {
+    return;
+  }
   inputText = inputText.substring(0, inputText.length() - 1);
   inputText += c;
   inputText += '_';
@@ -169,23 +183,96 @@ void deleteInInput () {
   updateInputText(inputText);
 }
 
-void next() {
-  // TODO: Handle transition
-  currentStateD1++;
+// ================ Display 0 ================
 
-  if (currentStateD1 <= finalStateD1) {
-    initDisplay1(d1_labels[currentStateD1]);
+void initDisplay0 (String* options_, int nOptions_) {
+    typeDisplay = 0;
+    
+    options = options_;
+    nOptions = nOptions_;
+    optionSelectorY = 0;
+    selectedOption = 0;
+
+    inputText = "_";
+    updateDisplay0();
+}
+
+void updateDisplay0 () {
+    display3Options(options, nOptions, optionSelectorY);
+    updateInputText(inputText);
+    updateSelectedOption(selectedOption);
+}
+
+void updateSelectedOption (int index) {
+
+}
+// Implementar manejo de selected option con asterisco
+
+void writeAsterisc(int row) {
+    writeChar('*', 19, row);
+}
+
+// ================ Display 1 ================
+
+void initDisplay1 (String labelText) {
+    typeDisplay = 1;
+
+    label = labelText;
+
+    inputText = "_";
+    updateDisplay1();
+}
+
+void updateDisplay1 () {
+    updateLabelText(label);
+    updateInputText(inputText);
+}
+
+void updateLabelText (String newText) {
+    clearRow(1);
+    // TODO: Handle better length > 20
+    if (newText.length() > 20) {
+        newText = newText.substring(0, 20);
+    }
+    writeRow(1, newText);
+}
+
+void nextDisplay1(int jump) {  
+  if (currentStateD1+jump <= nStatesD1) {
+    initDisplay1(d1_labels[currentStateD1 + jump]);
   } else {
-    // !: Handle currentDisplay1 > finalStateD1
-    Serial.println("Final state reached");
+    callFunctionCode(nextFCodeD1);
   }
+}
+
+void next(int jump = 1) {
+  // TODO: Handle transition
+
+  switch (typeDisplay)
+  {
+  case 1:
+    nextDisplay1(jump);
+    break;
+  
+  default:
+    break;
+  }
+
+
+}
+
+// ================ Display 0 ================
+
+void menuPrincipal() {
+  initDisplay0("Menu Principal", menu_principal_options, 10);
 }
 
 // ================ Display 1 ================
 
 void login() {
   d1_labels = login_labels;
-  finalStateD1 = 3;
+  nStatesD1 = 4;
+  nextFCodeD1 = 1;
   currentStateD1 = 0;
   initDisplay1(d1_labels[currentStateD1]);
 }
@@ -194,11 +281,15 @@ void onKeyPress ( char key ) {
     switch ( typeDisplay ) {
         case 1:
           if (key == 'A') {
-            deleteInInput();
+            if ((inputText.length() == 1) && (currentStateD1 != 0)) {
+              next(-1);
+            } else {
+              deleteInInput();
+            }
           } else if ((key == 'B')||(key == 'C')) {
             noop();
           } else if (key == 'D') {
-            next();
+            next(1);
           } else {
             writeInInput(key);
           }
