@@ -2,6 +2,22 @@
 #include <Wire.h>               /*~ Librería I2C ~*/
 #include <LiquidCrystal_I2C.h>  /*~ Librería LCD ~*/
 
+void noop() {
+  Serial.println("Noop");
+}
+
+// ================ Hardware ================
+
+void setupLcd() {
+  lcd.init();
+  lcd.backlight();
+  delay ( 1000 );
+  lcd.noBacklight ( );
+  delay ( 1000 );
+  lcd.backlight();
+  lcd.clear();
+}
+
 const uint8_t ROWS = 4;
 const uint8_t COLS = 4;
 char keys[ROWS][COLS] = {
@@ -18,9 +34,59 @@ Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
 LiquidCrystal_I2C lcd ( 0x27, 20, 4 );  /*~ Instancia de la clase para el manejo de la pantalla ( Dirección I2C, cantidad de columnas, cantidad de filas ) ~*/
 
+// ================ Display Basics ================
+
 // Cursor
 int currentX = 0;
 int currentY = 0;
+
+void moveCursor(int x, int y) {
+    lcd.setCursor(x, y);
+    currentX = x;
+    currentY = y;
+}
+
+void clearChar(int x, int y) {
+    moveCursor(x, y);
+    lcd.print(" ");
+}
+
+void writeChar(char c, int x, int y) {
+    moveCursor(x, y);
+    lcd.print(c);
+}
+
+void writeRow (int row, String text) {
+    lcd.setCursor(0, row);
+    if (text.length() > 20) {
+        text = text.substring(0, 20);
+    }
+    lcd.print(text);
+}
+
+void clearRow(int row) {
+    writeRow(row, "                    ");
+}
+
+// ================ Display Utilities ================
+
+void setFooter (String footerText) {
+    writeRow(3, footerText);
+}
+
+void write3Options (String* displayedOptions) {
+    for (int i = 0; i < 3; i++) {
+        writeRow(i, displayedOptions[i]);
+    }
+}
+
+void display3Options (String* options, int nOptions, int index) {
+  if (index + 2 < nOptions) {
+    String displayedOptions[] = {options[index], options[index + 1], options[index + 2]};
+    write3Options(displayedOptions);
+  }
+  // !: Handle index + 2 >= nOptions
+}
 
 // Globals
 
@@ -61,52 +127,7 @@ String* d1_labels;
 // Login
 String login_labels[] = {"Inserte Operador", "Inserte Clave Operador", "Inserte Autorizador", "Inserte Clave Autorizador"};
 
-void moveCursor(int x, int y) {
-    lcd.setCursor(x, y);
-    currentX = x;
-    currentY = y;
-}
-
-void clearChar(int x, int y) {
-    moveCursor(x, y);
-    lcd.print(" ");
-}
-
-void writeChar(char c, int x, int y) {
-    moveCursor(x, y);
-    lcd.print(c);
-}
-
-
-void writeRow (int row, String text) {
-    lcd.setCursor(0, row);
-    if (text.length() > 20) {
-        text = text.substring(0, 20);
-    }
-    lcd.print(text);
-}
-
-void setFooter (String footer) {
-    writeRow(3, footer);
-}
-
-void write3Options (String* displayedOptions) {
-    for (int i = 0; i < 3; i++) {
-        writeRow(i, displayedOptions[i]);
-    }
-}
-
-void display3Options (String* options, int nOptions, int index) {
-  if (index + 2 < nOptions) {
-    String displayedOptions[] = {options[index], options[index + 1], options[index + 2]};
-    write3Options(displayedOptions);
-  }
-  // !: Handle index + 2 >= nOptions
-}
-
-void clearRow(int row) {
-    writeRow(row, "                    ");
-}
+// ================ Handle Displays ================
 
 void initDisplay1 (String labelText) {
     typeDisplay = 1;
@@ -135,6 +156,7 @@ void updateInputText (String newText) {
 }
 
 void writeInInput (char c) {
+  // ! Handle length > 20
   inputText = inputText.substring(0, inputText.length() - 1);
   inputText += c;
   inputText += '_';
@@ -159,8 +181,13 @@ void next() {
   }
 }
 
-void noop() {
-  Serial.println("Noop");
+// ================ Display 1 ================
+
+void login() {
+  d1_labels = login_labels;
+  finalStateD1 = 3;
+  currentStateD1 = 0;
+  initDisplay1(d1_labels[currentStateD1]);
 }
 
 void onKeyPress ( char key ) {
@@ -179,23 +206,6 @@ void onKeyPress ( char key ) {
         default:
           break;
     }
-}
-
-void setupLcd() {
-  lcd.init();
-  lcd.backlight();
-  delay ( 1000 );
-  lcd.noBacklight ( );
-  delay ( 1000 );
-  lcd.backlight();
-  lcd.clear();
-}
-
-void login() {
-  d1_labels = login_labels;
-  finalStateD1 = 3;
-  currentStateD1 = 0;
-  initDisplay1(d1_labels[currentStateD1]);
 }
 
 void setup ( void ) {
