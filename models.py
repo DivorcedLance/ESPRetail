@@ -74,6 +74,7 @@ class Producto(Base):
     id_categoria_producto = Column(Integer, ForeignKey('categorias_productos.id_categoria_producto'))
     id_tienda = Column(Integer, ForeignKey('tiendas.id_tienda'))
     precio = Column(Float)
+    seMideEnKg = Column(Boolean)
 
 class OrdenCompra(Base):
     __tablename__ = 'ordenes_compra'
@@ -163,13 +164,33 @@ class ReporteDeCaja(Base):
     fecha_hora_reporte = Column(String(19))
     n_reporte = Column(Integer)
     id_observacion = Column(Integer, ForeignKey('observaciones.id_observacion'))
+
     monto_de_sobre = Column(Float)
-    # TODO: por cada medio de pago
     monto_soles = Column(Float)
     monto_dolares = Column(Float)
+    monto_euros = Column(Float)
+    monto_qr = Column(Float)
+    monto_tarjeta_creditoX = Column(Float)
+    monto_tarjeta_debitoX = Column(Float)
+    monto_ncx = Column(Float)
+    monto_tarjeta_alimentos = Column(Float)
+    monto_vale_mercaderia = Column(Float)
 
 
 class Observacion(Base):
     __tablename__ = 'observaciones'
     id_observacion = Column(Integer, primary_key=True)
     descripcion = Column(String(200))
+
+class ValeMercaderia(Base):
+    __tablename__ = 'vales_mercaderia'
+    id_vale = Column(Integer, primary_key=True)
+    ean13 = Column(String(13))
+    monto = Column(Float)
+
+class TipoCambio(Base):
+    __tablename__ = 'tipos_cambio'
+    id_tipo_cambio = Column(Integer, primary_key=True)
+    nombreDivisa = Column(String(3))
+    valorSoles = Column(Float)
+
