@@ -190,6 +190,8 @@ void setup ( void ) {
 
   lcd.setCursor ( 0, 0 );
   writeChar('o', 0, 0);
+
+  Serial.begin(115200); //UART
 }
 
 void loop ( void ) {
