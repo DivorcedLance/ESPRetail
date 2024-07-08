@@ -8,16 +8,6 @@ void noop() {
 
 // ================ Hardware ================
 
-void setupLcd() {
-  lcd.init();
-  lcd.backlight();
-  delay ( 1000 );
-  lcd.noBacklight ( );
-  delay ( 1000 );
-  lcd.backlight();
-  lcd.clear();
-}
-
 const uint8_t ROWS = 4;
 const uint8_t COLS = 4;
 char keys[ROWS][COLS] = {
@@ -33,6 +23,16 @@ uint8_t rowPins[ROWS] = { 25, 26, 27, 14 }; // Pins connected to R1, R2, R3, R4
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
 LiquidCrystal_I2C lcd ( 0x27, 20, 4 );  /*~ Instancia de la clase para el manejo de la pantalla ( Dirección I2C, cantidad de columnas, cantidad de filas ) ~*/
+
+void setupLcd() {
+  lcd.init();
+  lcd.backlight();
+  delay ( 1000 );
+  lcd.noBacklight ( );
+  delay ( 1000 );
+  lcd.backlight();
+  lcd.clear();
+}
 
 // ================ Display Basics ================
 
@@ -56,10 +56,10 @@ void writeChar(char c, int x, int y) {
     lcd.print(c);
 }
 
-void writeRow (int row, String text) {
+void writeRow (int row, String text, int maxlength = 20) {
     lcd.setCursor(0, row);
-    if (text.length() > 20) {
-        text = text.substring(0, 20);
+    if (text.length() > maxlength) {
+        text = text.substring(0, maxlength);
     }
     lcd.print(text);
 }
@@ -74,16 +74,17 @@ void setFooter (String footerText) {
     writeRow(3, footerText);
 }
 
-void write3Options (String* displayedOptions) {
+void write3Options (String* displayedOptions, int maxlength = 20) {
     for (int i = 0; i < 3; i++) {
-        writeRow(i, displayedOptions[i]);
+        clearRow(i);
+        writeRow(i, displayedOptions[i], maxlength);
     }
 }
 
-void display3Options (String* options, int nOptions, int index) {
+void display3Options (String* options, int nOptions, int index, int maxlength = 20) {
   if (index + 2 < nOptions) {
     String displayedOptions[] = {options[index], options[index + 1], options[index + 2]};
-    write3Options(displayedOptions);
+    write3Options(displayedOptions, maxlength);
   }
   // !: Handle index + 2 >= nOptions
 }
@@ -147,6 +148,8 @@ String login_labels[] = {"Inserte Operador", "Inserte Clave Operador", "Inserte 
 // ================ CallBack Implementation ================
 
 void callFunctionCode (int code) {
+    Serial.println("Call Function Code");
+    Serial.println(code);
     switch (code) {
         case 0:
             login();
@@ -187,6 +190,7 @@ void deleteInInput () {
 
 void initDisplay0 (String* options_, int nOptions_) {
     typeDisplay = 0;
+    displayIndex = 0;
     
     options = options_;
     nOptions = nOptions_;
@@ -198,18 +202,58 @@ void initDisplay0 (String* options_, int nOptions_) {
 }
 
 void updateDisplay0 () {
-    display3Options(options, nOptions, optionSelectorY);
+    display3Options(options, nOptions, displayIndex, 19);
     updateInputText(inputText);
-    updateSelectedOption(selectedOption);
+    updateOptionSelectorY(optionSelectorY);
 }
 
-void updateSelectedOption (int index) {
-
+void updateOptionSelectorY (int optionSelectorY) {
+  for (int i = 0; i < 3; i++) {
+    if (i == optionSelectorY) {
+      writeAsterisc(i);
+    } else {
+      deleteAsterisc(i);
+    }
+  }
 }
-// Implementar manejo de selected option con asterisco
+
+void moveupD0() {
+    if (selectedOption > 0) {
+        selectedOption--;
+    }
+
+    if (optionSelectorY > 0) {
+        optionSelectorY--;
+    } else {
+        if (displayIndex > 0) {
+            displayIndex--;
+        }
+    }
+
+    updateDisplay0();
+}
+
+void movedownD0() {
+    if (selectedOption < nOptions - 1) {
+        selectedOption++;
+    }
+
+    if (optionSelectorY < 2) {
+        optionSelectorY++;
+    } else {
+        if (displayIndex + 2 < nOptions) {
+            displayIndex++;
+        }
+    }
+    updateDisplay0();
+}
 
 void writeAsterisc(int row) {
     writeChar('*', 19, row);
+}
+
+void deleteAsterisc(int row) {
+    clearChar(19, row);
 }
 
 // ================ Display 1 ================
@@ -237,9 +281,10 @@ void updateLabelText (String newText) {
     writeRow(1, newText);
 }
 
-void nextDisplay1(int jump) {  
-  if (currentStateD1+jump <= nStatesD1) {
-    initDisplay1(d1_labels[currentStateD1 + jump]);
+void nextDisplay1(int jump) {
+  currentStateD1 += jump;
+  if (currentStateD1 < nStatesD1) {
+    initDisplay1(d1_labels[currentStateD1]);
   } else {
     callFunctionCode(nextFCodeD1);
   }
@@ -264,7 +309,7 @@ void next(int jump = 1) {
 // ================ Display 0 ================
 
 void menuPrincipal() {
-  initDisplay0("Menu Principal", menu_principal_options, 10);
+  initDisplay0(menu_principal_options, 6);
 }
 
 // ================ Display 1 ================
@@ -277,8 +322,23 @@ void login() {
   initDisplay1(d1_labels[currentStateD1]);
 }
 
+// ================ Keypad Handler ================
+
 void onKeyPress ( char key ) {
     switch ( typeDisplay ) {
+        case 0:
+          if (key == 'A') {
+            noop();
+          } else if (key == 'B') {
+            moveupD0();
+          } else if (key == 'C') {
+            movedownD0();
+          } else if (key == 'D') {
+            noop();
+          } else {
+            noop();
+          }
+        break;
         case 1:
           if (key == 'A') {
             if ((inputText.length() == 1) && (currentStateD1 != 0)) {
@@ -294,6 +354,7 @@ void onKeyPress ( char key ) {
             writeInInput(key);
           }
           break;
+        
         default:
           break;
     }
